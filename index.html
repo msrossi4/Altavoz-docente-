@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amplificador de Voz</title>
+    <title>Amplificador de Voz - Modo Clase</title>
     <style>
         * {
             margin: 0;
@@ -31,7 +31,7 @@
             text-align: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
         }
 
@@ -42,28 +42,36 @@
         }
 
         .subtitle {
-            font-size: 1.1em;
-            opacity: 0.8;
+            font-size: 1.2em;
+            opacity: 0.9;
             margin-bottom: 30px;
+            color: #FFE082;
         }
 
         .status {
-            font-size: 1.2em;
+            font-size: 1.3em;
             margin-bottom: 30px;
-            padding: 15px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 15px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
         }
 
         .status.active {
             background: rgba(76, 175, 80, 0.3);
-            border-color: rgba(76, 175, 80, 0.5);
+            border-color: rgba(76, 175, 80, 0.7);
+            animation: activeGlow 2s ease-in-out infinite;
         }
 
         .status.error {
             background: rgba(244, 67, 54, 0.3);
-            border-color: rgba(244, 67, 54, 0.5);
+            border-color: rgba(244, 67, 54, 0.7);
+        }
+
+        @keyframes activeGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.6); }
         }
 
         .controls {
@@ -74,101 +82,192 @@
         }
 
         .btn {
-            padding: 15px 30px;
-            font-size: 1.2em;
+            padding: 18px 35px;
+            font-size: 1.3em;
+            font-weight: 600;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .btn:active {
-            transform: translateY(0);
+            transform: translateY(-1px);
         }
 
         .btn.primary {
             background: linear-gradient(45deg, #4CAF50, #45a049);
             border-color: #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(45deg, #45a049, #3d8b40);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
         }
 
         .btn.danger {
             background: linear-gradient(45deg, #f44336, #d32f2f);
             border-color: #f44336;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+            animation: pulseRed 1.5s ease-in-out infinite;
+        }
+
+        .btn.danger:hover {
+            background: linear-gradient(45deg, #d32f2f, #b71c1c);
+        }
+
+        @keyframes pulseRed {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .volume-control {
-            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
         }
 
         .volume-control label {
             display: block;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 600;
         }
 
         .volume-slider {
             width: 100%;
-            height: 8px;
+            height: 10px;
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.3);
             outline: none;
             -webkit-appearance: none;
+            margin: 10px 0;
         }
 
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(45deg, #FFE082, #FFC107);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
         }
 
         .volume-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(45deg, #FFE082, #FFC107);
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .volume-display {
+            margin-top: 15px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #FFE082;
         }
 
         .info {
-            font-size: 0.9em;
-            opacity: 0.8;
-            line-height: 1.5;
+            font-size: 1em;
+            opacity: 0.9;
+            line-height: 1.6;
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 15px;
             margin-top: 20px;
+            text-align: left;
+        }
+
+        .info strong {
+            color: #FFE082;
+            font-size: 1.1em;
         }
 
         .microphone-icon {
-            font-size: 4em;
+            font-size: 5em;
             margin-bottom: 20px;
-            opacity: 0.7;
+            opacity: 0.8;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
 
         .pulse {
-            animation: pulse 2s infinite;
+            animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.7; }
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .setup-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .setup-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FFE082;
+        }
+
+        .setup-steps {
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .setup-steps li {
+            margin-bottom: 8px;
+            list-style: none;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .setup-steps li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .audio-level {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .audio-level-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39, #FFC107, #FF5722);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -176,33 +275,48 @@
     <div class="container">
         <div class="microphone-icon" id="micIcon">🎤</div>
         <h1>Amplificador de Voz</h1>
-        <p class="subtitle">Para clases sin quedar afónica</p>
+        <p class="subtitle">📚 Perfecto para dar clases sin afónica</p>
+        
+        <div class="setup-section">
+            <div class="setup-title">🔧 Configuración Rápida</div>
+            <ol class="setup-steps">
+                <li>Conecta parlante externo (Bluetooth o cable)</li>
+                <li>Mantén el teléfono cerca de tu boca</li>
+                <li>Ajusta el volumen según tu aula</li>
+                <li>¡Presiona INICIAR y a enseñar!</li>
+            </ol>
+        </div>
         
         <div class="status" id="status">
-            Presiona "Iniciar" para comenzar
+            🎯 Todo listo. Presiona INICIAR para amplificar tu voz
+        </div>
+
+        <div class="audio-level" id="audioLevelContainer" style="display: none;">
+            <div class="audio-level-bar" id="audioLevelBar"></div>
         </div>
 
         <div class="controls">
             <button class="btn primary" id="startBtn" onclick="startAmplifier()">
-                🎤 Iniciar Amplificador
+                🚀 INICIAR AMPLIFICADOR
             </button>
             <button class="btn danger" id="stopBtn" onclick="stopAmplifier()" style="display: none;">
-                ⏹️ Detener
+                ⏹️ DETENER
             </button>
         </div>
 
         <div class="volume-control">
-            <label for="volumeSlider">🔊 Volumen de salida:</label>
-            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="80">
-            <div style="margin-top: 10px; font-size: 1.1em;" id="volumeValue">80%</div>
+            <label for="volumeSlider">🔊 Control de Volumen</label>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="75">
+            <div class="volume-display" id="volumeValue">75%</div>
         </div>
 
         <div class="info">
-            <strong>💡 Instrucciones:</strong><br>
-            • Conecta auriculares para evitar retroalimentación<br>
-            • Conecta un parlante externo si es necesario<br>
-            • Ajusta el volumen según tu necesidad<br>
-            • Mantén el teléfono cerca para mejor captura
+            <strong>💡 Consejos para mejores resultados:</strong><br><br>
+            • <strong>Distancia ideal:</strong> 20-30 cm del teléfono<br>
+            • <strong>Sin auriculares:</strong> Para evitar retroalimentación<br>
+            • <strong>Parlante externo:</strong> Mejor calidad y volumen<br>
+            • <strong>Prueba primero:</strong> Ajusta volumen antes de clase<br>
+            • <strong>Batería:</strong> Mantén el teléfono cargado
         </div>
     </div>
 
@@ -210,7 +324,9 @@
         let audioContext;
         let microphone;
         let gainNode;
+        let analyserNode;
         let isAmplifying = false;
+        let animationId;
 
         const statusEl = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
@@ -218,92 +334,211 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
         const micIcon = document.getElementById('micIcon');
+        const audioLevelContainer = document.getElementById('audioLevelContainer');
+        const audioLevelBar = document.getElementById('audioLevelBar');
+
+        // Configuración optimizada para parlante externo
+        const audioConfig = {
+            audio: {
+                echoCancellation: false,           // Desactivado para mejor amplificación
+                noiseSuppression: false,          // Desactivado para captar toda la voz
+                autoGainControl: false,           // Control manual de volumen
+                sampleRate: 44100,                // Alta calidad
+                channelCount: 1,                  // Mono para mejor rendimiento
+                latency: 0.01                     // Baja latencia
+            }
+        };
 
         // Actualizar display del volumen
         volumeSlider.addEventListener('input', function() {
             const volume = this.value;
             volumeValue.textContent = volume + '%';
             if (gainNode) {
-                gainNode.gain.value = volume / 100;
+                // Curva de volumen más suave
+                const gain = Math.pow(volume / 100, 2);
+                gainNode.gain.setValueAtTime(gain, audioContext.currentTime);
             }
         });
 
+        // Visualizador de nivel de audio
+        function updateAudioLevel() {
+            if (!analyserNode || !isAmplifying) return;
+
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyserNode.getByteFrequencyData(dataArray);
+
+            // Calcular nivel promedio
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+            const percentage = (average / 255) * 100;
+
+            // Actualizar barra visual
+            audioLevelBar.style.width = percentage + '%';
+
+            animationId = requestAnimationFrame(updateAudioLevel);
+        }
+
         async function startAmplifier() {
             try {
-                // Solicitar permisos de micrófono
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: false,
-                        noiseSuppression: false,
-                        autoGainControl: false
-                    } 
+                statusEl.textContent = '🔄 Iniciando... Permitir acceso al micrófono';
+                statusEl.className = 'status';
+
+                // Solicitar acceso al micrófono con configuración optimizada
+                const stream = await navigator.mediaDevices.getUserMedia(audioConfig);
+
+                // Crear contexto de audio con configuración profesional
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                    latencyHint: 'interactive',
+                    sampleRate: 44100
                 });
 
-                // Crear contexto de audio
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Crear nodos de audio
                 microphone = audioContext.createMediaStreamSource(stream);
                 gainNode = audioContext.createGain();
+                analyserNode = audioContext.createAnalyser();
 
-                // Configurar volumen inicial
-                gainNode.gain.value = volumeSlider.value / 100;
+                // Configurar analizador para visualización
+                analyserNode.fftSize = 256;
+                analyserNode.smoothingTimeConstant = 0.8;
 
-                // Conectar micrófono -> ganancia -> salida
+                // Configurar ganancia inicial con curva suave
+                const initialVolume = volumeSlider.value / 100;
+                gainNode.gain.setValueAtTime(Math.pow(initialVolume, 2), audioContext.currentTime);
+
+                // Conectar la cadena de audio: micrófono -> ganancia -> analizador -> salida
                 microphone.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                gainNode.connect(analyserNode);
+                analyserNode.connect(audioContext.destination);
 
-                // Actualizar UI
+                // Configurar para que use parlante externo si está disponible
+                try {
+                    // Intentar forzar salida por altavoz (disponible en algunos navegadores)
+                    if (audioContext.setSinkId) {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        const speakers = devices.filter(device => 
+                            device.kind === 'audiooutput' && 
+                            !device.label.toLowerCase().includes('headphone') &&
+                            !device.label.toLowerCase().includes('headset')
+                        );
+                        
+                        if (speakers.length > 0) {
+                            await audioContext.setSinkId(speakers[0].deviceId);
+                            console.log('Usando parlante externo:', speakers[0].label);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Usando dispositivo de salida por defecto');
+                }
+
+                // Actualizar interfaz
                 isAmplifying = true;
-                statusEl.textContent = '🔴 AMPLIFICANDO - Hablando en vivo';
+                statusEl.textContent = '🔴 ¡AMPLIFICANDO EN VIVO! Habla normalmente';
                 statusEl.className = 'status active';
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'block';
                 micIcon.className = 'pulse';
                 micIcon.textContent = '🔴';
+                audioLevelContainer.style.display = 'block';
+
+                // Iniciar visualización de audio
+                updateAudioLevel();
+
+                console.log('✅ Amplificador iniciado correctamente');
 
             } catch (error) {
-                console.error('Error al acceder al micrófono:', error);
-                statusEl.textContent = '❌ Error: No se pudo acceder al micrófono';
+                console.error('❌ Error al iniciar amplificador:', error);
+                
+                let errorMessage = '❌ Error: ';
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Necesitas permitir acceso al micrófono';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No se encontró micrófono';
+                } else {
+                    errorMessage += 'No se pudo acceder al micrófono';
+                }
+                
+                statusEl.textContent = errorMessage;
                 statusEl.className = 'status error';
             }
         }
 
         function stopAmplifier() {
-            if (audioContext) {
-                audioContext.close();
-                audioContext = null;
-            }
+            try {
+                // Detener animación
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
 
-            isAmplifying = false;
-            statusEl.textContent = 'Amplificador detenido';
-            statusEl.className = 'status';
-            startBtn.style.display = 'block';
-            stopBtn.style.display = 'none';
-            micIcon.className = '';
-            micIcon.textContent = '🎤';
+                // Cerrar contexto de audio
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+
+                // Limpiar variables
+                microphone = null;
+                gainNode = null;
+                analyserNode = null;
+                isAmplifying = false;
+
+                // Actualizar interfaz
+                statusEl.textContent = '✅ Amplificador detenido. Listo para reiniciar';
+                statusEl.className = 'status';
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                micIcon.className = '';
+                micIcon.textContent = '🎤';
+                audioLevelContainer.style.display = 'none';
+                audioLevelBar.style.width = '0%';
+
+                console.log('✅ Amplificador detenido correctamente');
+
+            } catch (error) {
+                console.error('Error al detener:', error);
+            }
         }
 
-        // Evitar que la pantalla se apague
+        // Evitar que la pantalla se apague durante uso
         let wakeLock = null;
 
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
                     wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('🔒 Pantalla bloqueada - no se apagará');
                 }
             } catch (err) {
                 console.log('Wake Lock no disponible:', err);
             }
         }
 
-        // Solicitar wake lock cuando se inicie
-        document.addEventListener('DOMContentLoaded', function() {
-            requestWakeLock();
-        });
-
-        // Manejar cuando la aplicación pierde el foco
+        // Manejar cambios de visibilidad
         document.addEventListener('visibilitychange', function() {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 requestWakeLock();
+            }
+        });
+
+        // Inicializar al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            requestWakeLock();
+            console.log('📱 Amplificador de Voz cargado y listo');
+        });
+
+        // Manejar errores globales
+        window.addEventListener('error', function(e) {
+            console.error('Error global:', e.error);
+        });
+
+        // Prevenir cierre accidental
+        window.addEventListener('beforeunload', function(e) {
+            if (isAmplifying) {
+                e.preventDefault();
+                e.returnValue = '¿Seguro que quieres cerrar? El amplificador está activo.';
             }
         });
     </script>
