@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amplificador de Voz</title>
+    <title>Amplificador de Voz Pro</title>
     <style>
         * {
             margin: 0;
@@ -31,7 +31,7 @@
             text-align: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
         }
 
@@ -64,6 +64,40 @@
         .status.error {
             background: rgba(244, 67, 54, 0.3);
             border-color: rgba(244, 67, 54, 0.5);
+        }
+
+        .device-selection {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .device-selection h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .device-group {
+            margin-bottom: 15px;
+        }
+
+        .device-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1em;
         }
 
         .controls {
@@ -103,6 +137,12 @@
         .btn.danger {
             background: linear-gradient(45deg, #f44336, #d32f2f);
             border-color: #f44336;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .volume-control {
@@ -170,16 +210,47 @@
             50% { transform: scale(1.1); opacity: 1; }
             100% { transform: scale(1); opacity: 0.7; }
         }
+
+        .refresh-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="microphone-icon" id="micIcon">🎤</div>
-        <h1>Amplificador de Voz</h1>
-        <p class="subtitle">Para clases sin quedar afónica</p>
+        <h1>Amplificador Pro</h1>
+        <p class="subtitle">Auricular para captar + Parlante para amplificar</p>
+        
+        <div class="device-selection">
+            <h3>🎛️ Configuración de Dispositivos</h3>
+            
+            <div class="device-group">
+                <label for="micSelect">🎤 Micrófono de entrada:</label>
+                <select id="micSelect">
+                    <option value="">Detectando micrófonos...</option>
+                </select>
+                <button class="refresh-btn" onclick="refreshDevices()">🔄 Actualizar</button>
+            </div>
+            
+            <div class="device-group">
+                <label for="speakerSelect">🔊 Altavoz de salida:</label>
+                <select id="speakerSelect">
+                    <option value="">Detectando altavoces...</option>
+                </select>
+                <button class="refresh-btn" onclick="refreshDevices()">🔄 Actualizar</button>
+            </div>
+        </div>
         
         <div class="status" id="status">
-            Presiona "Iniciar" para comenzar
+            Selecciona dispositivos y presiona "Iniciar"
         </div>
 
         <div class="controls">
@@ -199,10 +270,11 @@
 
         <div class="info">
             <strong>💡 Instrucciones:</strong><br>
-            • Conecta auriculares para evitar retroalimentación<br>
-            • Conecta un parlante externo si es necesario<br>
-            • Ajusta el volumen según tu necesidad<br>
-            • Mantén el teléfono cerca para mejor captura
+            • Conecta auriculares (se usará su micrófono)<br>
+            • Conecta parlante externo por Bluetooth o cable<br>
+            • Selecciona los dispositivos correctos arriba<br>
+            • El audio saldrá solo por el parlante externo<br>
+            • Perfecto para dar clases sin afónica
         </div>
     </div>
 
@@ -211,6 +283,8 @@
         let microphone;
         let gainNode;
         let isAmplifying = false;
+        let selectedMicId = null;
+        let selectedSpeakerId = null;
 
         const statusEl = document.getElementById('status');
         const startBtn = document.getElementById('startBtn');
@@ -218,6 +292,8 @@
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
         const micIcon = document.getElementById('micIcon');
+        const micSelect = document.getElementById('micSelect');
+        const speakerSelect = document.getElementById('speakerSelect');
 
         // Actualizar display del volumen
         volumeSlider.addEventListener('input', function() {
@@ -228,16 +304,96 @@
             }
         });
 
+        // Cargar dispositivos al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshDevices();
+            requestWakeLock();
+        });
+
+        async function refreshDevices() {
+            try {
+                // Solicitar permisos primero
+                await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                // Obtener lista de dispositivos
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                // Limpiar listas
+                micSelect.innerHTML = '<option value="">Selecciona micrófono...</option>';
+                speakerSelect.innerHTML = '<option value="">Selecciona altavoz...</option>';
+                
+                // Filtrar y agregar dispositivos
+                devices.forEach(device => {
+                    if (device.kind === 'audioinput' && device.deviceId !== 'default') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.textContent = device.label || `Micrófono ${device.deviceId.substr(0, 8)}`;
+                        micSelect.appendChild(option);
+                    } else if (device.kind === 'audiooutput' && device.deviceId !== 'default') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.textContent = device.label || `Altavoz ${device.deviceId.substr(0, 8)}`;
+                        speakerSelect.appendChild(option);
+                    }
+                });
+
+                // Auto-seleccionar si hay dispositivos
+                if (micSelect.options.length > 1) {
+                    // Buscar micrófono de auriculares (generalmente contiene "headset", "headphone" o similar)
+                    for (let option of micSelect.options) {
+                        if (option.textContent.toLowerCase().includes('head') || 
+                            option.textContent.toLowerCase().includes('auricular')) {
+                            micSelect.value = option.value;
+                            break;
+                        }
+                    }
+                    if (!micSelect.value) micSelect.selectedIndex = 1; // Seleccionar el primero si no encuentra auriculares
+                }
+
+                if (speakerSelect.options.length > 1) {
+                    // Buscar altavoz externo (evitar el de auriculares)
+                    for (let option of speakerSelect.options) {
+                        if (!option.textContent.toLowerCase().includes('head') && 
+                            !option.textContent.toLowerCase().includes('auricular')) {
+                            speakerSelect.value = option.value;
+                            break;
+                        }
+                    }
+                    if (!speakerSelect.value) speakerSelect.selectedIndex = 1; // Seleccionar el primero disponible
+                }
+
+                statusEl.textContent = 'Dispositivos cargados. Listo para iniciar.';
+                
+            } catch (error) {
+                console.error('Error al obtener dispositivos:', error);
+                statusEl.textContent = '❌ Error al acceder a dispositivos de audio';
+                statusEl.className = 'status error';
+            }
+        }
+
         async function startAmplifier() {
             try {
-                // Solicitar permisos de micrófono
-                const stream = await navigator.mediaDevices.getUserMedia({ 
+                selectedMicId = micSelect.value;
+                selectedSpeakerId = speakerSelect.value;
+
+                if (!selectedMicId) {
+                    statusEl.textContent = '⚠️ Selecciona un micrófono primero';
+                    statusEl.className = 'status error';
+                    return;
+                }
+
+                // Configurar constrains para el micrófono específico
+                const constraints = {
                     audio: {
+                        deviceId: selectedMicId ? { exact: selectedMicId } : undefined,
                         echoCancellation: false,
                         noiseSuppression: false,
                         autoGainControl: false
-                    } 
-                });
+                    }
+                };
+
+                // Obtener stream del micrófono seleccionado
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
                 // Crear contexto de audio
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -247,22 +403,39 @@
                 // Configurar volumen inicial
                 gainNode.gain.value = volumeSlider.value / 100;
 
-                // Conectar micrófono -> ganancia -> salida
+                // Conectar: micrófono -> control de volumen -> salida
                 microphone.connect(gainNode);
+                
+                // Si hay altavoz específico seleccionado, intentar usarlo
+                if (selectedSpeakerId && audioContext.setSinkId) {
+                    try {
+                        await audioContext.setSinkId(selectedSpeakerId);
+                        statusEl.textContent = '🔴 AMPLIFICANDO - Usando altavoz seleccionado';
+                    } catch (e) {
+                        console.warn('No se pudo establecer el altavoz específico:', e);
+                        statusEl.textContent = '🔴 AMPLIFICANDO - Usando altavoz por defecto';
+                    }
+                } else {
+                    statusEl.textContent = '🔴 AMPLIFICANDO - Usando altavoz por defecto';
+                }
+
                 gainNode.connect(audioContext.destination);
 
                 // Actualizar UI
                 isAmplifying = true;
-                statusEl.textContent = '🔴 AMPLIFICANDO - Hablando en vivo';
                 statusEl.className = 'status active';
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'block';
                 micIcon.className = 'pulse';
                 micIcon.textContent = '🔴';
+                
+                // Deshabilitar selectores mientras está activo
+                micSelect.disabled = true;
+                speakerSelect.disabled = true;
 
             } catch (error) {
-                console.error('Error al acceder al micrófono:', error);
-                statusEl.textContent = '❌ Error: No se pudo acceder al micrófono';
+                console.error('Error al iniciar amplificador:', error);
+                statusEl.textContent = '❌ Error: No se pudo acceder al micrófono seleccionado';
                 statusEl.className = 'status error';
             }
         }
@@ -274,12 +447,16 @@
             }
 
             isAmplifying = false;
-            statusEl.textContent = 'Amplificador detenido';
+            statusEl.textContent = 'Amplificador detenido. Listo para reiniciar.';
             statusEl.className = 'status';
             startBtn.style.display = 'block';
             stopBtn.style.display = 'none';
             micIcon.className = '';
             micIcon.textContent = '🎤';
+            
+            // Rehabilitar selectores
+            micSelect.disabled = false;
+            speakerSelect.disabled = false;
         }
 
         // Evitar que la pantalla se apague
@@ -294,11 +471,6 @@
                 console.log('Wake Lock no disponible:', err);
             }
         }
-
-        // Solicitar wake lock cuando se inicie
-        document.addEventListener('DOMContentLoaded', function() {
-            requestWakeLock();
-        });
 
         // Manejar cuando la aplicación pierde el foco
         document.addEventListener('visibilitychange', function() {
